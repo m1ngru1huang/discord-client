@@ -50,6 +50,11 @@ impl WebhookMessageBuilder {
             message: self.message.unwrap_or_default(),
         })
     }
+
+    pub fn message(mut self, message: impl Into<String>) -> Self {
+        self.message = Some(message.into());
+        self
+    }
 }
 
 impl Webhooks {
