@@ -1,6 +1,5 @@
 //! Discord API
 
-use reqwest::header::HeaderName;
 use secrecy::{ExposeSecret, Secret};
 use serde_json::json;
 use thiserror::Error;
@@ -9,7 +8,7 @@ use tracing::instrument;
 const DISCORD_SERVER_URL: &str = "https://discord.com/api";
 
 #[derive(Error, Debug)]
-pub enum DiscordApiError {
+pub enum DiscordClientError {
     #[error("Invalid Webhook Message Builder: {0}")]
     InvalidWebhookMessageBuilder(String),
     #[error("Error when sending request to Discord server")]
@@ -40,9 +39,9 @@ impl WebhookMessage {
 }
 
 impl WebhookMessageBuilder {
-    pub fn build(self) -> Result<WebhookMessage, DiscordApiError> {
+    pub fn build(self) -> Result<WebhookMessage, DiscordClientError> {
         if self.message.is_none() {
-            return Err(DiscordApiError::InvalidWebhookMessageBuilder(
+            return Err(DiscordClientError::InvalidWebhookMessageBuilder(
                 "`message` field required".into(),
             ));
         }
@@ -68,7 +67,7 @@ impl Webhooks {
 impl Webhooks {
     /// Execute(Send) webhook message.
     #[instrument(name = "discord.webhooks.execute_webhook", skip(self, message))]
-    pub async fn execute_webhook(&self, message: WebhookMessage) -> Result<(), DiscordApiError> {
+    pub async fn execute_webhook(&self, message: WebhookMessage) -> Result<(), DiscordClientError> {
         let payload = json!({
             "content": message.message,
         });
